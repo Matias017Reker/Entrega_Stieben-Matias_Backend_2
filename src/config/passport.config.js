@@ -1,0 +1,25 @@
+import passport from "passport";
+import { Strategy as JwtStrategy, ExtractJwt } from "passport-jwt";
+import User from "../models/User.js";
+
+const JWT_SECRET = process.env.JWT_SECRET || "secret_de_prueba";
+
+const opts = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: JWT_SECRET
+};
+
+passport.use(
+    "jwt",
+    new JwtStrategy(opts, async (jwt_payload, done) => {
+        try {
+            const user = await User.findById(jwt_payload.id);
+            if (!user) return done(null, false);
+            return done(null, user);
+        } catch (error) {
+            return done(error, false);
+        }
+    })
+);
+
+export default passport;
